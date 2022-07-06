@@ -1,4 +1,6 @@
-{ lib, stdenv, fetchFromGitHub, darwin }:
+{ lib, stdenv, fetchFromGitHub, darwin
+, enableStatic ? stdenv.targetPlatform.isStatic 
+}:
 
 stdenv.mkDerivation rec {
   pname = "cctz";
@@ -15,7 +17,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Foundation;
 
-  installTargets = [ "install_hdrs" "install_shared_lib" ];
+  installTargets = [ "install_hdrs" ] ++ lib.optional (!enableStatic) "install_shared_lib"  ++ lib.optional enableStatic "install_lib";
 
   postInstall = lib.optionalString stdenv.isDarwin ''
     install_name_tool -id $out/lib/libcctz.so $out/lib/libcctz.so
@@ -31,3 +33,4 @@ stdenv.mkDerivation rec {
     platforms = platforms.all;
   };
 }
+"
